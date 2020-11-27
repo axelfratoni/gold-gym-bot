@@ -146,3 +146,5 @@ while True:
     print("Sleeping for {} hours until {}".format(str(sleep_interval), next_time))
     print("(And adding 100 seconds)")
     time.sleep(sleep_interval.total_seconds() + 100)
+
+    session = new_session(user, password)
