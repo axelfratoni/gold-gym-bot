@@ -64,7 +64,7 @@ def find_events(session):
             if(event["dayOfWeek"] == desired_class["dayOfWeek"]
                 and event["eventStartTime"] == desired_class["eventStartTime"]
                 and int(event["maxEnrollment"]) > int(event["enrolled"])
-                and event["allowEnroll"] == "True"):
+                and event["allowEnroll"]):
                 events_found.append(event)    
     if(len(events_found) == 0):
         print("No available events found\n")
@@ -140,7 +140,7 @@ show_upcomming_classes(session)
 while True:
     available_events = find_events(session)
     if(len(available_events) > 0):
-        suscribe_to_events(available_events)
+        suscribe_to_events(session, available_events)
         show_upcomming_classes(session)
     sleep_interval, next_time = calculate_sleep_interval()
     print("Sleeping for {} hours until {}".format(str(sleep_interval), next_time))
