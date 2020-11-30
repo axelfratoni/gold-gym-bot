@@ -69,7 +69,8 @@ def find_events(session):
     if(len(events_found) == 0):
         print("No available events found\n")
     else:
-        print("Found {} available events".format(len(events_found)))
+        event_count = len(events_found)
+        print("Found {} available event{}\n".format(event_count, "s" if(event_count > 1) else ""))
     return events_found
 
 def suscribe_to_events(session, events):
@@ -81,6 +82,7 @@ def suscribe_to_events(session, events):
             print("Suscribed to event! (date: {} | time: {})".format(event["eventDate"], event["eventStartTime"]))
         except:
             print("Failed to suscribe to event (date: {} | time: {})".format(event["eventDate"], event["eventStartTime"]))
+    print()
 
 def show_upcomming_classes(session):
     schedule = []
