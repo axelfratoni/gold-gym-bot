@@ -8,18 +8,20 @@ from datetime import timedelta, datetime, date
 EVENT_NAME = "Workout Reservation"
 CLUB_NUMBER = "08898"
 HOURS_TO_SINGUP = 72
+RETRY_ATTEMPTS = 5
+ATTEMPT_INTERVAL_SECONDS = 5
 DESIRED_CLASSES = [
     {
         "dayOfWeek" : "MON",
-        "eventStartTime" : "08:00 pm"
+        "eventStartTime" : "06:30 pm"
     },
     {
         "dayOfWeek" : "WED",
-        "eventStartTime" : "08:00 pm"
+        "eventStartTime" : "06:30 pm"
     },
     {
         "dayOfWeek" : "FRI",
-        "eventStartTime" : "08:00 pm"
+        "eventStartTime" : "06:30 pm"
     }
 ]
 
@@ -84,6 +86,25 @@ def suscribe_to_events(session, events):
             print("Failed to suscribe to event (date: {} | time: {})".format(event["eventDate"], event["eventStartTime"]))
     print()
 
+def attempt_to_suscribe(session):
+    attempts = 0
+    while(attempts < RETRY_ATTEMPTS):
+        print("[{}] Attempting to subscribe ({})".format(datetime.now(), attempts + 1))
+        previous_schedule = get_schedule(session, HOURS_TO_SINGUP)
+        available_events = find_events(session)
+        if(len(available_events) > 0):
+            suscribe_to_events(session, available_events)
+            current_schedule = get_schedule(session, HOURS_TO_SINGUP)
+            if(len(previous_schedule) < len(current_schedule)):
+                return
+        print("Failed to suscribe.\n")
+        attempts += 1
+        if(attempts < RETRY_ATTEMPTS):
+            time.sleep(ATTEMPT_INTERVAL_SECONDS)
+    print("Maximun attempts reached.")
+
+
+
 def show_upcomming_classes(session):
     schedule = []
     try:
@@ -130,23 +151,22 @@ def sign_out_from_class(session, club_number, event_id):
 
 ################################# Main #################################
 
-if(len(sys.argv) != 3):
-    print("Enter your user and password")
-    sys.exit()
+def wait_and_suscribe():
+    if(len(sys.argv) != 3):
+        print("Enter your user and password")
+        sys.exit()
 
-user, password = sys.argv[1], sys.argv[2]
-session = new_session(user, password)
-
-show_upcomming_classes(session)
-
-while True:
-    available_events = find_events(session)
-    if(len(available_events) > 0):
-        suscribe_to_events(session, available_events)
-        show_upcomming_classes(session)
-    sleep_interval, next_time = calculate_sleep_interval()
-    print("Sleeping for {} hours until {}".format(str(sleep_interval), next_time))
-    print("(And adding 100 seconds)")
-    time.sleep(sleep_interval.total_seconds() + 100)
-
+    user, password = sys.argv[1], sys.argv[2]
     session = new_session(user, password)
+
+    show_upcomming_classes(session)
+
+    while True:
+        print("-------------------------------------------------------")
+        attempt_to_suscribe(session)
+        sleep_interval, next_time = calculate_sleep_interval()
+        print("[{}] Sleeping for {} hours until {}".format(datetime.now(), str(sleep_interval), next_time))
+        time.sleep(sleep_interval.total_seconds())
+        session = new_session(user, password)
+
+wait_and_suscribe()
