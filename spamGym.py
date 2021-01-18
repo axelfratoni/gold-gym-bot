@@ -136,6 +136,6 @@ while(True):
         print("Job done")
         sys.exit()
     else:
-        print("Failed to sign up")
+        print("[{}] Failed to sign up".format(datetime.now()))
     time.sleep(60)
     session = new_session(user, password)
